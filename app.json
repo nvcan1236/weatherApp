@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "pizzaUI",
+    "slug": "pizzaUI",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "pizzaUI"
+}
