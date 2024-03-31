@@ -24,8 +24,6 @@ function City() {
         `https://api.openweathermap.org/data/2.5/weather?units=metric&lang=vi&id=${id}&appid=${key}`
       ).then((res) => res.json());
 
-      console.info(data);
-
       if (data.cod === 200) {
         setDetail(data);
       } else {

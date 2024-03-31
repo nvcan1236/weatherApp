@@ -263,7 +263,6 @@ export const cities = [
     timezone: 25200,
     id: 1581130,
     name: "Hà Nội",
-    cod: 200,
   },
   { timezone: 25200, id: 1580240, name: "Huế", cod: 200 },
   { timezone: 25200, id: 1583992, name: "Đà Nẵng", cod: 200 },
@@ -271,7 +270,6 @@ export const cities = [
     timezone: 25200,
     id: 1569684,
     name: "Plây Cu",
-    cod: 200,
   },
   { timezone: 25200, id: 1584071, name: "Dalat", cod: 200 },
   { timezone: 25200, id: 1581298, name: "Hải Phòng", cod: 200 },
@@ -280,6 +278,5 @@ export const cities = [
     timezone: 39600,
     id: 2147714,
     name: "Sydney",
-    cod: 200,
   },
 ];

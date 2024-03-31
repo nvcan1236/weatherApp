@@ -6,13 +6,12 @@ import {
   Image,
   ScrollView,
   TextInput,
+  FlatList,
 } from "react-native";
-import PizzaListItem from "./components/PizzaListItem.jsx";
-import { pizzaShops } from "./components/dumb-data.js";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { AppRegistry } from "react-native-web";
 import { APIKey } from "../weatherConfig.js";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 function Home() {
   const city = "vietnam";
@@ -20,6 +19,7 @@ function Home() {
   const key = APIKey;
   const nav = useNavigation();
   const [homeWeather, setHomeWeather] = useState({});
+  const [forecastList, setForecastList] = useState({});
 
   useEffect(() => {
     fetch(
@@ -29,76 +29,158 @@ function Home() {
       .then((data) => setHomeWeather(data));
   }, []);
 
+  useEffect(() => {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?units=metric&lang=vi&id=${id}&appid=${key}&cnt=8`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setForecastList(data.list);
+      });
+  }, []);
+
   return (
-    <View style={{ width: "100%" }}>
+    <View
+      style={{
+        width: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.08)",
+        paddingVertical: 20,
+      }}
+    >
       {homeWeather.name && (
-        <View style={styles.center}>
-          <Image
-            style={styles.image}
-            source={{
-              uri: "https://emerhub.com/wp-content/uploads/districts-of-HCMC-explained.jpg",
-            }}
-          />
-          <View style={styles.info}>
-            <View style={{ marginTop: 20 }}>
+        <View style={styles.wrapper}>
+          <View style={{ ...styles.container, position: "relative" }}>
+            <Image
+              style={styles.locationImage}
+              source={{
+                uri: "https://emerhub.com/wp-content/uploads/districts-of-HCMC-explained.jpg",
+              }}
+            />
+            <View style={styles.topInfo}>
               <Text style={styles.location}>
                 {homeWeather.name}, {homeWeather.sys.country}
               </Text>
-              <Text style={[styles.location, { marginTop: 8 }]}>
-                {new Date().toLocaleDateString("vi")}
+              <Text style={styles.date}>
+                {new Date().toLocaleDateString(undefined, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
               </Text>
             </View>
-            <View style={styles.general}>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "500",
-                  textAlign: "center",
-                  marginBottom: 16,
-                }}
-              >
-                {homeWeather.weather[0].description[0].toUpperCase() +
-                  homeWeather.weather[0].description.slice(1)}
-              </Text>
-              <Text style={styles.h2}>{homeWeather.main.temp} o C</Text>
+          </View>
 
-              <Text style={{ marginTop: 100, textAlign: "center" }}>
-                Thông tin chi tiết
-              </Text>
-              <View style={styles.moreTemp}>
-                <View style={[styles.detailItem, { width: "40%" }]}>
-                  <Text>Thấp nhất</Text>
-                  <Text style={{ fontWeight: "600", fontSize: 18 }}>
-                    {homeWeather.main.temp_min} o C
-                  </Text>
+          <View style={styles.container}>
+            <View style={styles.general}>
+              <View>
+                <Text style={styles.temp}>{homeWeather.main.temp} ºC</Text>
+                <Text style={styles.desc}>
+                  {homeWeather.weather[0].description[0].toUpperCase() +
+                    homeWeather.weather[0].description.slice(1)}
+                </Text>
+              </View>
+              <Image
+                style={styles.weatherImage}
+                source={{
+                  uri: `https://openweathermap.org/img/wn/${homeWeather.weather[0].icon}@2x.png`,
+                }}
+              />
+            </View>
+          </View>
+
+          <View style={[styles.container]}>
+            <View style={{ flexDirection: "row", width: "100%" }}>
+              <View style={[styles.detail, styles.detailItem]}>
+                <Text style={{ fontWeight: "500" }}>Thông tin chi tiết:</Text>
+                <Text>
+                  Nhiệt độ cao nhất là {homeWeather.main.temp_max}ºC, thấp nhất
+                  là {homeWeather.main.temp_min}ºC. Bình minh lúc{" "}
+                  {new Date(homeWeather.sys.sunrise * 1000).toLocaleTimeString(
+                    "vi-VI",
+                    { hour: "2-digit", minute: "2-digit", hour12: false }
+                  )}
+                  . Hoàng hôn lúc{" "}
+                  {new Date(homeWeather.sys.sunset * 1000).toLocaleTimeString(
+                    "vi-Vi",
+                    { hour: "2-digit", minute: "2-digit", hour12: false }
+                  )}
+                  .
+                </Text>
+              </View>
+
+              <View style={styles.moreInfo}>
+                <View
+                  style={[styles.detailItem, { flex: 1, alignItems: "center" }]}
+                >
+                  <Ionicons name="rainy-outline" size={20} />
+                  <Text>Mưa</Text>
+                  <Text>{homeWeather.rain?.["1h"] || 0} mm</Text>
                 </View>
-                <View style={[styles.detailItem, { width: "40%" }]}>
-                  <Text>Cao nhất</Text>
-                  <Text style={{ fontWeight: "600", fontSize: 18 }}>
-                    {homeWeather.main.temp_max} o C
-                  </Text>
+
+                <View style={{ flexDirection: "row" }}>
+                  <View
+                    style={[
+                      styles.detailItem,
+                      { flex: 1, alignItems: "center" },
+                    ]}
+                  >
+                    <Ionicons name="water-outline" size={20} />
+                    <Text>Độ ẩm</Text>
+                    <Text>{homeWeather.main.humidity}%</Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.detailItem,
+                      { flex: 1, alignItems: "center" },
+                    ]}
+                  >
+                    <Ionicons name="rainy-outline" size={20} />
+                    <Text>Gió</Text>
+                    <Text>{homeWeather.wind.speed}m/s</Text>
+                  </View>
                 </View>
               </View>
             </View>
-            <View style={styles.detail}>
-              <View style={styles.detailItem}>
-                <Text>Áp suất</Text>
-                <Text style={{ fontWeight: "600", fontSize: 18 }}>
-                  {homeWeather.main.pressure} mbar
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Text>Độ ẩm</Text>
-                <Text style={{ fontWeight: "600", fontSize: 18 }}>
-                  {homeWeather.main.humidity}%
-                </Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Text>Tốc độ gió</Text>
-                <Text style={{ fontWeight: "600", fontSize: 18 }}>
-                  {homeWeather.wind.speed}m/s
-                </Text>
-              </View>
+          </View>
+
+          <View style={styles.container}>
+            <Text style={{ fontWeight: "500", marginTop: 12 }}>
+              Dự báo thời biết 24h
+            </Text>
+            <View style={styles.forecast}>
+              {forecastList.length >= 0 &&
+                forecastList.map((f) => (
+                  <View
+                    key={f.dt}
+                    style={[
+                      styles.detailItem,
+                      {
+                        width: "22%",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxSizing: "border-box",
+                      },
+                    ]}
+                  >
+                    <Image
+                      source={{
+                        uri: `https://openweathermap.org/img/wn/${f.weather[0].icon}@2x.png`,
+                      }}
+                      style={styles.forecastImage}
+                    />
+                    <Text>
+                      {new Date(f.dt * 1000).toLocaleTimeString("vi-Vi", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
+                    </Text>
+                    <Text>{f.weather[0].main}</Text>
+                    <Text>{f.main.temp}ºC</Text>
+                  </View>
+                ))}
             </View>
           </View>
         </View>
@@ -108,69 +190,76 @@ function Home() {
 }
 
 const styles = StyleSheet.create({
-  image: {
+  container: {
+    paddingHorizontal: 20,
+  },
+  locationImage: {
     width: "100%",
-    height: 220,
+    height: 140,
+    borderRadius: 12,
   },
-  info: {
-    backgroundColor: "transparent",
-    width: "88%",
-    borderRadius: 20,
-    paddingVertical: 32,
-    paddingHorizontal: 12,
-    marginTop: -100,
-    backgroundColor: "#fff",
-    shadowColor: "#ccc",
-    shadowOpacity: 0.5,
-    shadowOffsetX: 4,
-    shadowOffsetY: 4,
-  },
-  center: {
+  topInfo: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 20,
+    marginHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 0, 0,0.5)",
     display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "500",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 6,
-    marginBottom: 4,
+    justifyContent: "flex-end",
   },
   location: {
-    fontSize: 18,
-    fontWeight: "400",
-    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 16,
+    color: "white",
+  },
+  date: {
+    color: "#eee",
+    fontSize: 14,
   },
   general: {
-    fontSize: 18,
-    marginTop: 72,
-  },
-  moreTemp: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  weatherImage: {
+    width: 120,
+    height: 120,
+  },
+  temp: {
+    fontWeight: "700",
+    fontSize: 32,
     marginTop: 12,
   },
-  h2: {
-    fontSize: 24,
-    fontWeight: "700",
-    textAlign: "center",
+  detailItem: {
+    margin: 4,
+    borderWidth: 1,
+    borderRadius: 12,
+    borderBlockColor: "#333",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#ccc",
+    color: "#fff",
   },
   detail: {
-    marginTop: 20,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flex: 2,
+    paddingVertical: 22,
+    minHeight: 150,
   },
-  detailItem: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "#b4d8e8",
-    borderRadius: 6,
+  moreInfo: {
+    flex: 3,
+  },
+  forecastImage: {
+    width: 40,
+    height: 40,
+  },
+  forecast: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 });
 
